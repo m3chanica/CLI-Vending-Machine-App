@@ -1,10 +1,13 @@
 package com.techelevator;
 
+import java.math.BigDecimal;
+
 public class StuffedAnimal extends VendingMachineItem{
 
     //Declare properties
     private String animalType; //Ex. Duck, Cat, Pony
     private String animalMessage; //Ex. Quack, Meow
+
 
     //Getters and Setters
     public String getAnimalType() {
@@ -37,10 +40,10 @@ public class StuffedAnimal extends VendingMachineItem{
     //Constructors
     public StuffedAnimal() {}
 
-    public StuffedAnimal(String animalType) {
+    public StuffedAnimal(String productCode, String productName, BigDecimal productPrice, int quantityInStock, String animalType) {
+        super(productCode, productName, productPrice, quantityInStock);
         this.animalType = animalType;
-        this.animalMessage = getAnimalMessage();
+        this.animalMessage = this.getAnimalType();
     }
-
 
 }

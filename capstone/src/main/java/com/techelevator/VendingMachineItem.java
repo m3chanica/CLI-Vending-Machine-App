@@ -1,11 +1,13 @@
 package com.techelevator;
 
+import java.math.BigDecimal;
+
 public class VendingMachineItem {
 
     //Declare properties
     private String productCode; //Ex. A1, B2
     private String productName; //Ex. Yellow Duck, Black Cat
-    private double productPrice;
+    private BigDecimal productPrice;
     private int quantityInStock;
 
     //Declare constant for max # of each product
@@ -26,10 +28,10 @@ public class VendingMachineItem {
         this.productName = productName;
     }
 
-    public double getProductPrice() {
+    public BigDecimal getProductPrice() {
         return this.productPrice;
     }
-    public void setProductPrice(double productPrice) {
+    public void setProductPrice(BigDecimal productPrice) {
         this.productPrice = productPrice;
     }
 
@@ -44,10 +46,10 @@ public class VendingMachineItem {
     //Constructors
     public VendingMachineItem() {}
 
-    public VendingMachineItem(String productCode, double productPrice, String productName, int quantityInStock) {
+    public VendingMachineItem(String productCode, String productName, BigDecimal productPrice, int quantityInStock) {
         this.productCode = productCode;
-        this.productPrice = productPrice;
         this.productName = productName;
+        this.productPrice = productPrice;
         this.quantityInStock = quantityInStock;
     }
 

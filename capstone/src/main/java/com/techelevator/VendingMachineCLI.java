@@ -2,6 +2,7 @@ package com.techelevator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.math.BigDecimal;
 import java.util.*;
 
 
@@ -20,7 +21,7 @@ public class VendingMachineCLI {
 	private final Scanner userInput = new Scanner(System.in);
 
 	//Initialize Map to hold inventory objects
-	private Map<String, VendingMachineItem> inventoryMap = new HashMap<String, VendingMachineItem>();
+	private Map<String, StuffedAnimal> inventoryMap = new HashMap<String, StuffedAnimal>();
 
 
 
@@ -31,16 +32,19 @@ public class VendingMachineCLI {
 	public void run() {
 		//While loop to iterate through each line of the inventory list
 		while(inventoryInput.hasNextLine()){
-			//Parse out the
+			//Split each line into multiple parts, saved into an array
 			String line = inventoryInput.nextLine();
 			String[] lineSplit = line.split("\\|");
+			BigDecimal convertedPrice = new BigDecimal(lineSplit[2]);
 
-			for (int i=0; i < aray length ; i++)
-				Stuffed i = lineSplit
-			String objectName = lineSplit[1];
-			StuffedAnimal (lineSplit[1].toString()) =
+			//Create new instance of StuffedAnimal
+			StuffedAnimal toy = new StuffedAnimal(lineSplit[0], lineSplit[1], convertedPrice, 5, lineSplit[3]);
 
-
+			inventoryMap.put(toy.getProductCode(), toy);
+		}
+		for (Map.Entry<String, StuffedAnimal> thingy : inventoryMap.entrySet()) {
+			
+			}
 		}
 
 	}
