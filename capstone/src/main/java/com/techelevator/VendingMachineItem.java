@@ -8,7 +8,7 @@ public class VendingMachineItem {
     private String productCode; //Ex. A1, B2
     private String productName; //Ex. Yellow Duck, Black Cat
     private BigDecimal productPrice;
-    private int quantityInStock;
+    public Integer quantityInStock;
 
     //Declare constant for max # of each product
     private final int MAX_QUANTITY = 5;
@@ -35,10 +35,10 @@ public class VendingMachineItem {
         this.productPrice = productPrice;
     }
 
-    private int getQuantityInStock() {
+    public Integer getQuantityInStock() {
         return this.quantityInStock;
     }
-    private void setQuantityInStock() {
+    public void setQuantityInStock(Integer quantityInStock) {
         this.quantityInStock = quantityInStock;
     }
 
@@ -46,7 +46,7 @@ public class VendingMachineItem {
     //Constructors
     public VendingMachineItem() {}
 
-    public VendingMachineItem(String productCode, String productName, BigDecimal productPrice, int quantityInStock) {
+    public VendingMachineItem(String productCode, String productName, BigDecimal productPrice, Integer quantityInStock) {
         this.productCode = productCode;
         this.productName = productName;
         this.productPrice = productPrice;

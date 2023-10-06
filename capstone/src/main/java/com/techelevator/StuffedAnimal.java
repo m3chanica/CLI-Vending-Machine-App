@@ -40,7 +40,7 @@ public class StuffedAnimal extends VendingMachineItem{
     //Constructors
     public StuffedAnimal() {}
 
-    public StuffedAnimal(String productCode, String productName, BigDecimal productPrice, int quantityInStock, String animalType) {
+    public StuffedAnimal(String productCode, String productName, BigDecimal productPrice, Integer quantityInStock, String animalType) {
         super(productCode, productName, productPrice, quantityInStock);
         this.animalType = animalType;
         this.animalMessage = this.getAnimalType();
