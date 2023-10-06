@@ -1,9 +1,10 @@
 package com.techelevator;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.io.File;
 
@@ -13,7 +14,7 @@ public class VendingMachineActions {
     public static Scanner userInput = new Scanner(System.in);
 
     //Method to display the Main Menu options
-    public static void displayMainMenuOptions(Map<String, StuffedAnimal> inventoryMap, BigDecimal balance) throws VendingMachineException, InterruptedException {
+    public static void displayMainMenuOptions(Map<String, StuffedAnimal> inventoryMap, BigDecimal balance, File logFile) throws VendingMachineException, InterruptedException {
         //Display main menu options
         System.out.println("(1) Display Vending Machine Items");
         System.out.println("(2) Purchase");
@@ -24,22 +25,22 @@ public class VendingMachineActions {
         String mainMenuChoice = userInput.nextLine();
 
         if (mainMenuChoice.equals("1")) {
-            VendingMachineActions.displayVendingMachineItems(inventoryMap, balance);
+            VendingMachineActions.displayVendingMachineItems(inventoryMap, balance, logFile);
 
         } else if (mainMenuChoice.equals("2")) {
-            displayPurchaseMenu(inventoryMap, balance);
+            displayPurchaseMenu(inventoryMap, balance, logFile);
 
         } else if (mainMenuChoice.equals("3")) {
             System.out.println("Thank you for using this vending machine.");
 
         } else {
             System.out.println("Ya done goofed. Try again.");
-            displayMainMenuOptions(inventoryMap, balance);
+            displayMainMenuOptions(inventoryMap, balance, logFile);
         }
     }
 
     //Method to output the contents of inventoryMap in order
-    public static void displayVendingMachineItems(Map<String,StuffedAnimal> inventoryMap, BigDecimal balance) throws VendingMachineException, InterruptedException {
+    public static void displayVendingMachineItems(Map<String,StuffedAnimal> inventoryMap, BigDecimal balance, File logFile) throws VendingMachineException, InterruptedException {
         System.out.println(inventoryMap.get("A1").getProductCode() + ") " + inventoryMap.get("A1").getProductName() + " $" + inventoryMap.get("A1").getProductPrice() + " Quantity: " + inventoryMap.get("A1").getQuantityInStock());
         System.out.println(inventoryMap.get("A2").getProductCode() + ") " + inventoryMap.get("A2").getProductName() + " $" + inventoryMap.get("A2").getProductPrice() + " Quantity: " + inventoryMap.get("A2").getQuantityInStock());
         System.out.println(inventoryMap.get("A3").getProductCode() + ") " + inventoryMap.get("A3").getProductName() + " $" + inventoryMap.get("A3").getProductPrice() + " Quantity: " + inventoryMap.get("A3").getQuantityInStock());
@@ -63,10 +64,10 @@ public class VendingMachineActions {
 //        System.out.println("---");
 //        Thread.sleep(1000);
 
-        displayMainMenuOptions(inventoryMap, balance);
+        displayMainMenuOptions(inventoryMap, balance, logFile);
     }
 
-    public static void displayPurchaseMenu(Map<String, StuffedAnimal> inventoryMap, BigDecimal balance) {
+    public static void displayPurchaseMenu(Map<String, StuffedAnimal> inventoryMap, BigDecimal balance, File logFile) {
 
         System.out.println("---");
         System.out.println("");
@@ -81,35 +82,54 @@ public class VendingMachineActions {
         String purchaseMenuChoice = userInput.nextLine();
 
         if (purchaseMenuChoice.equals("1")) {
-            VendingMachineActions.feedMoney(inventoryMap, balance);
+            VendingMachineActions.feedMoney(inventoryMap, balance, logFile);
 
         } else if (purchaseMenuChoice.equals("2")) {
-            displayPurchaseList(inventoryMap, balance);
+            displayPurchaseList(inventoryMap, balance, logFile);
 
         } else if (purchaseMenuChoice.equals("3")) {
-            calculateChange(balance);
+            calculateChange(balance, logFile);
         } else {
             System.out.println("Oopsie ya made a poopsie.");
-            displayPurchaseMenu(inventoryMap, balance);
+            displayPurchaseMenu(inventoryMap, balance, logFile);
         }
     }
 
-    public static void feedMoney(Map<String, StuffedAnimal> inventoryMap, BigDecimal balance) {
+    public static void feedMoney(Map<String, StuffedAnimal> inventoryMap, BigDecimal balance, File logFile) {
         Scanner readMoneyInput = new Scanner(System.in);
 
-        System.out.println("Please input the whole dollar amount you wish to deposit: ");
+        System.out.println("Please input the whole dollar amount you wish to deposit or Enter X to return to the previous menu: ");
         System.out.println("Note: this machine only accepts $1, $5, and $10 bills");
 
         System.out.print("$");
         String moneyInput = readMoneyInput.nextLine();
 
-        balance = balance.add(new BigDecimal(moneyInput));
+        if (moneyInput.equalsIgnoreCase("X")) {
+            displayPurchaseMenu(inventoryMap, balance, logFile);
 
-        displayPurchaseMenu(inventoryMap, balance); //update the Purchase Menu display w/ new balance
+        } else if(moneyInput.equals("1") || moneyInput.equals("5") || moneyInput.equals("10")) {
+
+            balance = balance.add(new BigDecimal(moneyInput));
+
+            try (PrintWriter pw = new PrintWriter(new FileOutputStream(logFile, true) )) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
+                pw.println(dtf.format(now) + " FEED MONEY: $" + moneyInput + ".00 $" + balance + ".00");
+            }
+            catch(FileNotFoundException ex) {
+                System.err.println("I'M AN ERROR"); //System.err.println prints it out in NICE RED LETTERS TO SHOW YOU THAT SOMETHING IS WRONG
+            }
+
+        } else {
+            System.out.println("You have not deposited a valid bill? So like please try again?");
+            feedMoney(inventoryMap, balance, logFile);
+        }
+
+        displayPurchaseMenu(inventoryMap, balance, logFile); //update the Purchase Menu display w/ new balance
 
     }
 
-    public static void displayPurchaseList(Map<String, StuffedAnimal> inventoryMap, BigDecimal balance) {
+    public static void displayPurchaseList(Map<String, StuffedAnimal> inventoryMap, BigDecimal balance, File logFile) {
         System.out.println(inventoryMap.get("A1").getProductCode() + ") " + inventoryMap.get("A1").getProductName() + " $" + inventoryMap.get("A1").getProductPrice() + " Quantity: " + inventoryMap.get("A1").getQuantityInStock());
         System.out.println(inventoryMap.get("A2").getProductCode() + ") " + inventoryMap.get("A2").getProductName() + " $" + inventoryMap.get("A2").getProductPrice() + " Quantity: " + inventoryMap.get("A2").getQuantityInStock());
         System.out.println(inventoryMap.get("A3").getProductCode() + ") " + inventoryMap.get("A3").getProductName() + " $" + inventoryMap.get("A3").getProductPrice() + " Quantity: " + inventoryMap.get("A3").getQuantityInStock());
@@ -152,70 +172,87 @@ public class VendingMachineActions {
 
                     System.out.println("You purchased: " + cheese.getProductName() + " for $" + cheese.getProductPrice() + " and have $" + balance + " remaining.");
 
-                    displayPurchaseMenu(inventoryMap, balance);
+                    try (PrintWriter pw = new PrintWriter(new FileOutputStream(logFile, true) )) {
+                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+                        LocalDateTime now = LocalDateTime.now();
+                        pw.println(dtf.format(now) + " " + cheese.getProductName() + " " + cheese.getProductCode() + " $" + cheese.getProductPrice() + " $" + balance);
+                    }
+                    catch(FileNotFoundException ex) {
+                        System.err.println("I'M AN ERROR"); //System.err.println prints it out in NICE RED LETTERS TO SHOW YOU THAT SOMETHING IS WRONG
+                    }
+
+                    displayPurchaseMenu(inventoryMap, balance, logFile);
 
                 } else {
                     System.out.println("Insufficient funds. Please make another selection or deposit additional funds: ");
-                    displayPurchaseMenu(inventoryMap, balance);
+                    displayPurchaseMenu(inventoryMap, balance, logFile);
                 }
 
             } else {
                 System.out.println("This item is out of stock! Please make another selection: ");
-                displayPurchaseMenu(inventoryMap, balance);
+                displayPurchaseMenu(inventoryMap, balance, logFile);
             }
         } else {
             System.out.println("This is not a valid product code! Please make another selection: ");
-            displayPurchaseMenu(inventoryMap, balance);
+            displayPurchaseMenu(inventoryMap, balance, logFile);
         }
 
     }
 
-    public static void calculateChange(BigDecimal change){
+    public static void calculateChange(BigDecimal change, File logFile){
+        BigDecimal previousBalance = change; //keep the original balance to add to log file later
+
         BigDecimal quarters = new BigDecimal(0);
         BigDecimal nickels = new BigDecimal(0);
         BigDecimal dimes = new BigDecimal(0);
         String changeStatement = "";
 
-        if(change.remainder(new BigDecimal(.25)).compareTo(BigDecimal.ZERO) == 0 || (change.compareTo(BigDecimal.valueOf(.24))) == 1){
-            quarters = quarters.add(change.divide(BigDecimal.valueOf(.25)));
+        if(change.remainder(new BigDecimal(.25)).compareTo(BigDecimal.ZERO) == 0 || (change.compareTo(BigDecimal.valueOf(.24))) == 1) {
+            change = change.multiply(BigDecimal.valueOf(100));
+            BigInteger changeRound = change.toBigInteger();
+            BigInteger quartersRound = quarters.toBigInteger();
+            quartersRound = (changeRound.divide(BigInteger.valueOf(25)));
+            change = new BigDecimal(changeRound).divide(BigDecimal.valueOf(100));
+            quarters = new BigDecimal(quartersRound);
             change = change.subtract(quarters.multiply(BigDecimal.valueOf(.25)));
-
-            if(change.remainder(new BigDecimal(.10)).compareTo(BigDecimal.ZERO) == 0 || (change.compareTo(BigDecimal.valueOf(.09))) == 1){
-                dimes = dimes.add(change.divide(BigDecimal.valueOf(.10)));
-                change = change.subtract(dimes.multiply(BigDecimal.valueOf(.10)));
-
-                if(change.remainder(new BigDecimal(.05)).compareTo(BigDecimal.ZERO) == 0 || (change.compareTo(BigDecimal.valueOf(.04))) == 1){
-                    nickels = nickels.add(change.divide(BigDecimal.valueOf(.05)));
-                    change = change.subtract(nickels.multiply(BigDecimal.valueOf(.05)));
-                }
-            }
-            BigInteger nickelsInt = nickels.toBigInteger();
-            BigInteger dimesInt = dimes.toBigInteger();
-            BigInteger quartersInt = quarters.toBigInteger();
-            changeStatement = "Your change is " + quartersInt + " quarters, " + dimesInt + " dimes, and " + nickelsInt + " nickels!";
         }
-        else if(change.compareTo(BigDecimal.valueOf(.25)) == -1){
-            dimes = dimes.add(change.divide(BigDecimal.valueOf(.10)));
+
+        if(change.remainder(new BigDecimal(.10)).compareTo(BigDecimal.ZERO) == 0 || (change.compareTo(BigDecimal.valueOf(.09))) == 1) {
+            change = change.multiply(BigDecimal.valueOf(100));
+            BigInteger changeRound = change.toBigInteger();
+            BigInteger dimesRound = dimes.toBigInteger();
+            dimesRound = (changeRound.divide(BigInteger.valueOf(10)));
+            change = new BigDecimal(changeRound).divide(BigDecimal.valueOf(100));
+            dimes = new BigDecimal(dimesRound);
             change = change.subtract(dimes.multiply(BigDecimal.valueOf(.10)));
-            if(change.remainder(new BigDecimal(.05)).compareTo(BigDecimal.ZERO) == 0 || (change.compareTo(BigDecimal.valueOf(.04))) == 1){
-                nickels = nickels.add(change.divide(BigDecimal.valueOf(.05)));
-                change = change.subtract(nickels.multiply(BigDecimal.valueOf(.05)));
-            }
-            BigInteger nickelsInt = nickels.toBigInteger();
-            BigInteger dimesInt = dimes.toBigInteger();
-            BigInteger quartersInt = quarters.toBigInteger();
-            changeStatement = "Your change is " + quartersInt + " quarters, " + dimesInt + " dimes, and " + nickelsInt + " nickels!";
         }
-        else if(change.compareTo(BigDecimal.valueOf(.10)) == -1){
-            if(change.remainder(new BigDecimal(.05)).compareTo(BigDecimal.ZERO) == 0 || (change.compareTo(BigDecimal.valueOf(.04))) == 1){
-                nickels = nickels.add(change.divide(BigDecimal.valueOf(.05)));
-                change = change.subtract(nickels.multiply(BigDecimal.valueOf(.05)));
-            }
-            BigInteger nickelsInt = nickels.toBigInteger();
-            BigInteger dimesInt = dimes.toBigInteger();
-            BigInteger quartersInt = quarters.toBigInteger();
-            changeStatement = "Your change is " + quartersInt + " quarters, " + dimesInt + " dimes, and " + nickelsInt + " nickels!";
+
+        if (change.remainder(new BigDecimal(.05)).compareTo(BigDecimal.ZERO) == 0 || (change.compareTo(BigDecimal.valueOf(.04))) == 1) {
+            change = change.multiply(BigDecimal.valueOf(100));
+            BigInteger changeRound = change.toBigInteger();
+            BigInteger nickelsRound = nickels.toBigInteger();
+            nickelsRound = (changeRound.divide(BigInteger.valueOf(5)));
+            change = new BigDecimal(changeRound).divide(BigDecimal.valueOf(100));
+            nickels = new BigDecimal(nickelsRound);
+            change = change.subtract(nickels.multiply(BigDecimal.valueOf(.05)));
         }
+
+        BigInteger nickelsInt = nickels.toBigInteger();
+        BigInteger dimesInt = dimes.toBigInteger();
+        BigInteger quartersInt = quarters.toBigInteger();
+        changeStatement = "Your change is " + quartersInt + " quarters, " + dimesInt + " dimes, and " + nickelsInt + " nickels!";
+
+
+        try (PrintWriter pw = new PrintWriter(new FileOutputStream(logFile, true) )) {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            //03/01/2023 12:01:35 PM GIVE CHANGE: $6.75 $0.00
+            pw.println(dtf.format(now) + " GIVE CHANGE: $" + previousBalance + " $0.00");
+        }
+        catch(FileNotFoundException ex) {
+            System.err.println("I'M AN ERROR"); //System.err.println prints it out in NICE RED LETTERS TO SHOW YOU THAT SOMETHING IS WRONG
+        }
+
         System.out.println(changeStatement);
     }
 

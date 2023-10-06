@@ -2,6 +2,8 @@ package com.techelevator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -23,11 +25,17 @@ public class VendingMachineCLI {
 	//Initialize the balance
 	BigDecimal balance = BigDecimal.valueOf(0);
 
+	//Set path for log file
+	File logFile = new File("C:\\Users\\Student\\workspace\\java-minicapstonemodule1-team1\\capstone", "log.txt");
+
+	//Initialize log.txt file for recording $ transactions
+	PrintWriter dataOutput = new PrintWriter(logFile);
+
 	public VendingMachineCLI() throws FileNotFoundException {
 
 	}
 
-	public void run() throws VendingMachineException, InterruptedException {
+	public void run() throws VendingMachineException, InterruptedException, IOException {
 		//While loop to iterate through each line of the inventory list
 		while(inventoryInput.hasNextLine()){
 			//Split each line into multiple parts, saved into an array
@@ -41,11 +49,14 @@ public class VendingMachineCLI {
 			inventoryMap.put(toy.getProductCode(), toy);
 		}
 
+		//Create the log file
+		logFile.createNewFile();
+
 		//Display Main Menu
-		VendingMachineActions.displayMainMenuOptions(inventoryMap, balance);
+		VendingMachineActions.displayMainMenuOptions(inventoryMap, balance, logFile);
 	}
 
-	public static void main(String[] args) throws FileNotFoundException, VendingMachineException, InterruptedException {
+	public static void main(String[] args) throws IOException, VendingMachineException, InterruptedException {
 		VendingMachineCLI cli = new VendingMachineCLI();
 		cli.run();
 	}
